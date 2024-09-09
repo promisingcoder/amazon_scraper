@@ -1,6 +1,10 @@
 import scrapy
 import re 
 import string
+def has_digits(a):
+    for item in a:
+        if item in string.digits:
+            return True
 def format(str1):
     new_string = ""
     for char in str1:
@@ -11,13 +15,18 @@ def format(str1):
     
         
         
-    modified =  set(new_string.split(" "))
-    return(" ".join(modified))
+    modified =  new_string.split(" ")
+    return(" ".join([a for a in modified if a.isalpha() or has_digits(a)]))
 class AmazonProductExtractorPySpider(scrapy.Spider):
     name = "amazon_product_extractor.py"
     allowed_domains = ["amazon.com","amazon.eg"]
-    start_urls = ["https://www.amazon.eg/-/en/Adidas-CBLACK-FTWWHT-SKATEBOARDING-SHOES/dp/B0BJL3BWDZ"]
+    def __init__(self, domain=None, *args, **kwargs):
+        self.domain = domain
 
+    def start_requests(self):
+        urls = [self.domain]
+        for url in urls:
+            yield scrapy.Request(url=url, callback=self.parse)
     def parse(self, response):
         reviews = response.xpath("//div[contains(@id, 'customer_review')]")
         extracted_product = {}
@@ -27,9 +36,9 @@ class AmazonProductExtractorPySpider(scrapy.Spider):
         extracted_product['color'] = response.css("img.imgSwatch").xpath("@alt").getall()
         extracted_product['Product Details'] = response.css("div#productFactsDesktopExpander span.a-color-base::text").get()
         extracted_product['Product description'] = response.css("div#productDescription  span::text").get()
-        product_details = [format(a.replace("\u200f\n", "").replace("\n","")) for a in  response.css("div#detailBullets_feature_div span.a-list-item *::text").getall() if a != '']
-        product_details = list(filter(None, product_details))
-        extracted_product['product_details_general'] = product_details
+        product_details_general = [format(a.replace("\u200f\n", "").replace("\n","")) for a in  response.css("div#detailBullets_feature_div span.a-list-item *::text").getall() if a != '']
+        product_details_general = list(filter(None, product_details_general))
+        extracted_product['product_details_general'] = product_details_general
 
 
         for review in reviews:
