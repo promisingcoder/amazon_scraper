@@ -44,7 +44,7 @@ class AmazonProductExtractorPySpider(scrapy.Spider):
         for review in reviews:
             extracted_product[review.attrib["id"]] = {
                 "review_person_name" : review.css("span.a-profile-name::text").get(),
-                "review_title" : review.css("span.cr-original-review-content::text").get(),
+                "review_title" : [a for a in review.css("a[data-hook='review-title'] *::text").getall() if a is not '' and '\n' not in a],
                 "review_rating" : review.css("i[data-hook='review-star-rating'] span.a-icon-alt::text").get(),
                 "review_date" : review.css('span[data-hook="review-date"]::text').get(),
                 "review_product_size_and_color" : review.css('span[data-hook="format-strip-linkless"]::text').get()
