@@ -18,7 +18,7 @@ def rearrange_tags_according_to_importance(all_tags,piority_tags):
 
 fields1 =  {
     'productTitle' : '        Testa Toro Comfortable Casual Shoes High Sole for Everyday Life - Testa Toro       ',
-    'rating' : '3.0 ',
+    'rating' : '3.0',
     'price' : 'EGP299.00',
     'product_color' : 'aura white',
     'category_product_details' : 'Care instructions',
@@ -45,7 +45,7 @@ fields1 =  {
         }
 fields2 = {
     'productTitle' : '        adidas mens GRAND COURT ALPHA Sneaker       ',
-    'rating' :  '4.4 ',
+    'rating' :  '4.4',
     'price' : 'EGP4,949',
     'product_color' : 'ftwr white,legend ink,bright royal',
     'category_product_details' : 'Care instructions',
@@ -73,66 +73,75 @@ def parent(tag):
 all_tags = list(set(all_tags))
 def find_parent_selector(Found,tag,found,soup1,soup2,selection_string,item):
     n = 0
+    if tag.parent.name == "html" or tag.parent.name == "body":
+        return Found
     parent_attributes  = tag.parent.attrs
     parent = tag.parent
     for thing1 in parent_attributes:
         if thing1 == 'class':
             for class_name in parent_attributes[thing1]:
-                selection_string = f"{parent.name}[{thing1}='{class_name}']"+" > " + selection_string
+                selection_string = f"{parent.name}[{thing1}='{class_name}']"+"  " + selection_string
                 selection = soup1.select(selection_string)
-                condition = len([a for a in soup2.select(selection_string) if a.text  == fields2[item]]) == 0
-                if len(selection) == len(found) and not condition:
+                condition = [a for a in soup2.select(selection_string) if a.text  == fields2[item]]
+                if   condition:
                                         
                     Found[item] = selection_string
                     break
         else:
             
-            selection_string = f"{parent.name}[{thing1}='{parent_attributes[thing1]}']"+" > " + selection_string
+            selection_string = f"{parent.name}[{thing1}='{parent_attributes[thing1]}']"+"  " + selection_string
             selection = soup1.select(selection_string)
-            condition = len([a for a in soup2.select(selection_string) if a.text  == fields2[item]]) == 0
-            if len(selection) == len(found) and not condition:
+            condition = [a for a in soup2.select(selection_string) if a.text  == fields2[item]] 
+            if   condition:
                                     
                 Found[item] = selection_string
                 break
 
         if item in Found.keys():
             break
-        print("Found before")
-        print(Found)
-        Found2 = find_parent_selector(Found,parent,found,soup1,soup2,selection_string,item)
-        for key in Found2.keys():
-            Found[key] = Found2[key]
-        print("Found_after")
-        print(Found)            
+        
+    print(Found)
+    Found  = find_parent_selector(Found,parent,found,soup1,soup2,selection_string,item)
+    
+                    
         
         
     return(Found)
+
 def return_selectors(soup1,soup2,all_tags,fields1,fields2):
     selector_list = []
     Found = {}
+    
     for _ in all_tags:
-        condition = False
+        
+        
         for item in fields1:
+            found_condition = False
             if item  == 'review_found_this_helpful':
                 continue
             found = soup1.findAll(
                     lambda tag:tag.name == _ and
                     tag.text ==  fields1[item])
             
-            if found:
+            
+            if found != []:
+                
             
                 tag = found[0]
                 attributes = tag.attrs
                 for thing in attributes:
+                    if found_condition == True:
+                        break
                     if thing == 'class':
                         for class_name in attributes[thing]:
-                            selection_dict = {thing:  class_name}
-                            selection = soup1.find_all(tag.name,selection_dict)
-                            condition = len([a for a in soup2.find_all(tag.name) if a.text  == fields2[item]]) == 0
-                            if len(selection) == len(found) and not condition:
+                            selection_string = f"{tag.name}[class={class_name}]"
+                            selection = soup1.select(selection_string)
+                            condition = [a for a in soup2.find_all(tag.name) if a.text  == fields2[item]]
+                            if len(condition) == len(selection) :
                                 
                                 
-                                Found[item] = {'tag' : f'{tag.name}','selection' :  selection_dict}
+                                Found[item] =  selection_string
+                                found_condition = True
                                 break
                         
 
@@ -140,13 +149,15 @@ def return_selectors(soup1,soup2,all_tags,fields1,fields2):
                         
                         selection_string = f"{tag.name}[{thing}='{attributes[thing]}']"
                         selection = soup1.select(selection_string)
-                        condition = len([a for a in soup2.select(selection_string) if a.text  == fields2[item]]) == 0
-                        if len(selection) == len(found) and not condition:
+                        condition = [a for a in soup2.select(selection_string) if a.text  == fields2[item]]
+                        if  len(condition) == len(selection):
                         
                             Found[item] = selection_string
+                            found_condition = True
                             break
-                    
+                
                     Found =  find_parent_selector(Found,tag,found,soup1,soup2,selection_string,item)
+                    
                         
 
                    
