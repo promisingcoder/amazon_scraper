@@ -23,7 +23,6 @@ fields1 =  {
     'product_color' : 'aura white',
     'category_product_details' : 'Care instructions',
     'category_product_details_value' : 'Machine Wash',
-    'about_this_item_item_list' : 'Brand: Testa Toro',
     'product_description' : 'تركيبة فريدة من نوعه يتمزج بها خليط مميز من مواد التصنيع لوجه الحذاء لدينا هنا قميص أساسية من الألياف المطعم بجلد شمواه السويدي وتططمات أخرى من الجلد المعالجة مع طبين داخلي من فوم المزدوج وكل هذا يقف علي نعل مرتفع عن الأرض ذو كثافة عاليه مزود بفرش من فوم اضا ليعطي مع الشكل المميز تجربة راحة لا تصف',
     'product_details_general' : """Manufacturer
                                     ‏
@@ -33,7 +32,7 @@ fields1 =  {
     'review_user_name' : 'Abdo',
     'review_title' : 'متبهدل',
     'review_stars' : '1.0 out of 5 stars',
-    'review_product_size' : 'Size: 44 EU',
+    'review_product_size' : 'Size: 44 EUColor: beige (clay)',
     'review_product_color' : 'Color: beige (clay)',
     'review_verified_purchase' : 'Verified Purchase',
     'review_date' : 'Reviewed in Egypt on 22 July 2024'
@@ -50,8 +49,7 @@ fields2 = {
     'product_color' : 'ftwr white,legend ink,bright royal',
     'category_product_details' : 'Care instructions',
     'category_product_details_value' : 'Hand Wash Only',
-    'about_this_item_item_list' : 'LEATHER,SYNTHETICS',
-    'product_description'  : """The 3-Stripes mean heritage. And when they're placed on these adidas Grand Court Alpha shoes, they celebrate generations of originality. The clean silhouette brings forth that timeless look. An embossed logo on the tongue and upscale stitchwork give everything a modern touch. Cloudfoam brings cushioning that keeps every step a pampered experience.""",
+    'product_description'  : "The 3-Stripes mean heritage. And when they're placed on these adidas Grand Court Alpha shoes, they celebrate generations of originality. The clean silhouette brings forth that timeless look. An embossed logo on the tongue and upscale stitchwork give everything a modern touch. Cloudfoam brings cushioning that keeps every step a pampered experience.",
     'product_details_general' : """Date First Available
                                     ‏
                                         :
@@ -60,8 +58,8 @@ fields2 = {
     'review_user_name' : 'djkubi',
     'review_title' : 'Rahat ve Şık',
     'review_stars' : '5.0 out of 5 stars',
-    'review_product_size' : 'Size: 45 1/3 EU',
-    'review_product_color' : 'Color: silver pebble,silver pebble,olive strata',
+    'review_product_size' : 'Size: 42 EUColor: ftwr white,legend ink,bright royal',
+    
     'review_verified_purchase' : 'Verified Purchase',
     'review_date' : 'Reviewed in Turkey on 30 July 2024',
     'review_details' : 'Adidas hangi numara giyiyorsam bu numarayı sipariş ettim. Sorunsuz giyiyorum. Çok rahat şık ve dayanıklı bir seri.',
@@ -72,13 +70,24 @@ def parent(tag):
 
 all_tags = list(set(all_tags))
 def find_parent_selector(Found,tag,found,soup1,soup2,selection_string,item):
-    if selection_string.count(" ") > 1:
+    if item == "product_description":
+        print("Last 1")
+        print(selection_string)
+        if item in Found.keys():
+            print(Found[item])
+    if selection_string.count(" ") > 4:
         return(Found)
 
     if tag.parent.name == "html" or tag.parent.name == "body" :
         return Found
     parent_attributes  = tag.parent.attrs
     parent = tag.parent
+    if item == "product_description":
+        print("product_description parent : ")
+        print(parent)
+    if  not parent_attributes:
+        Found =  find_parent_selector(Found,parent,found,soup1,soup2,f"{parent.name} {tag.name}",item)
+
     for thing1 in parent_attributes:
         if thing1 == "style":
             continue
@@ -131,27 +140,49 @@ def return_selectors(soup1,soup2,all_tags,fields1,fields2):
     for _ in all_tags:
        
         if _ == "img":
-            print("found image in 1")
+            #print("found image in 1")
+            pass
+
         for item in fields1:
+            if item == "product_description":
+                print("1 : ")
+                print(item)
+
             found_condition = False
             if item  == 'review_found_this_helpful':
                 continue
             found = soup1.findAll(
     lambda tag: tag.name == _ and
-    (tag.text == fields1[item] or tag.get('alt') == fields1[item])
+tag.text == fields1[item]
 )
             
-            
-            if found:
+            if item == "review_product_size":
+                pass
+                #print(found)
+            if item == "product_description":
+                print("3 : ")
+                print(found)
+                if len(found) > 0:
+                    print(found[0])
+            if len(found) > 0:
                 
             
                 tag = found[0]
+                
                 if tag.name == "img":
-                    print("found in 2")
-                    print(tag)
+                    #print("found in 2")
+                    #print(tag)
+                    pass
                 else:
-                    print("img not found")
+                    pass
+                    #print("img not found")
                 attributes = tag.attrs
+                if item == "product_description":
+                    print("attributes of product_description")
+                    print(attributes)
+                if len(attributes) == 0:
+                    print("passed")
+                    Found =  find_parent_selector(Found,tag,found,soup1,soup2,tag.name,item)
                 for thing in attributes:
                     
                     
@@ -159,26 +190,37 @@ def return_selectors(soup1,soup2,all_tags,fields1,fields2):
                     if found_condition == True:
                         break
                     if tag.name == "img":
-                        print(attributes)
+                        #print(attributes)
+                        pass                    
                     if thing == 'class':
-                        print(thing)
+                        pass
+                        #print(thing)
                         
                         for class_name in attributes[thing]:
                             selection_string = f"{tag.name}[class='{class_name}']"
                             if tag.name == "img":
-                                print(selection_string)
+                                #print(selection_string)
+                                pass                            
                             selection_dict = {tag.name : {'class' : class_name}}
                             if "img" in selection_string:
-                                print(selection_string)
-
+                                pass
+                                #print(selection_string)
+                            if item == "review_product_size":
+                                #print(selection_string)
+                                pass
                             selection = soup1.select(selection_string)
                             
                            
                             condition = [a for a in soup2.select(selection_string) if a.text  == fields2[item] or a.get("alt") == fields2[item]]
                             if tag.name =="img":
+                                #print(selection)
+                                #print(condition)
+                                pass
+                            if item == "product_description":
+                                print("2 : ")
                                 print(selection)
                                 print(condition)
-                            if  condition and selection:
+                            if   len(condition) > 0 and len(selection) > 0 :
                                 
                                 
                                 Found[item] =  selection_string
@@ -194,24 +236,30 @@ def return_selectors(soup1,soup2,all_tags,fields1,fields2):
                             continue
                         selection_dict = {tag.name : {thing : attributes[thing]}}
                         selection = soup1.select(selection_string)
+                        
+
                        
                         
-                        condition = [a for a in soup2.select(selection_string) if a.text  == fields2[item] or a.get("alt") == fields2[item]]
-                       
-                        
-                        if  condition and selection:
+                        condition = [a for a in soup2.select(selection_string) ]
+                        if item == "review_product_size":
+                            #print(selection_string)
+                            #print("selection")
+                            #print(selection)
+                            #print("condition")
+                            #print(condition)
+                            pass
+                        if  len(condition) > 0 and len(selection) > 0 :
                         
                             Found[item] = selection_string
                             found_condition = True
                             
                             break
                     
-                    if found_condition == False:
+                  
+                        
+                        
+                    Found =  find_parent_selector(Found,tag,found,soup1,soup2,selection_string,item)
                     
-                        
-                        
-                        Found =  find_parent_selector(Found,tag,found,soup1,soup2,selection_string,item)
-                        break
 
         
                        
@@ -225,7 +273,9 @@ def return_selectors(soup1,soup2,all_tags,fields1,fields2):
                         
     return(Found)
 
-print(return_selectors(soup1,soup2,all_tags,fields1,fields2))
+result = return_selectors(soup1,soup2,all_tags,fields1,fields2)
+print(len(result))
+print(result)
 
     
 
