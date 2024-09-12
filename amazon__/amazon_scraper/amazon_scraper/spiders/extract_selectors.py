@@ -70,28 +70,37 @@ def parent(tag):
 
 all_tags = list(set(all_tags))
 def find_parent_selector(Found,tag,found,soup1,soup2,selection_string,item):
-    if item == "product_description":
-        print("Last 1")
+    if item  == "rating":
+        print("selection_string in parent function : ")
         print(selection_string)
+    if item == "product_description":
+        pass
+        #print("Last 1")
+        #print(selection_string)
         if item in Found.keys():
             print(Found[item])
     if selection_string.count(" ") > 4:
+        selection_list = selection_string.split(" ")
+        Found[item] = selection_list[0] + " " + selection_list[-1]
         return(Found)
 
     if tag.parent.name == "html" or tag.parent.name == "body" :
         return Found
     parent_attributes  = tag.parent.attrs
     parent = tag.parent
+    
     if item == "product_description":
-        print("product_description parent : ")
-        print(parent)
+        pass
+        #print("product_description parent : ")
+        #print(parent)
     if  not parent_attributes:
         Found =  find_parent_selector(Found,parent,found,soup1,soup2,f"{parent.name} {tag.name}",item)
 
     for thing1 in parent_attributes:
         if thing1 == "style":
             continue
-        
+        if thing1 == "href":
+            continue
         if thing1 == 'class':
             for class_name in parent_attributes[thing1]:
                 if parent_attributes[thing1] == "{}":
@@ -145,9 +154,12 @@ def return_selectors(soup1,soup2,all_tags,fields1,fields2):
 
         for item in fields1:
             if item == "product_description":
+                #print("1 : ")
+                #print(item)
+                pass
+            if item == "rating":
                 print("1 : ")
                 print(item)
-
             found_condition = False
             if item  == 'review_found_this_helpful':
                 continue
@@ -160,10 +172,18 @@ tag.text == fields1[item]
                 pass
                 #print(found)
             if item == "product_description":
-                print("3 : ")
+                pass
+                #print("3 : ")
+                #print(found)
+                if len(found) > 0:
+                    #print(found[0])
+                    pass
+            if item == "rating":
+                print("2 : ")
                 print(found)
                 if len(found) > 0:
                     print(found[0])
+                    pass
             if len(found) > 0:
                 
             
@@ -178,7 +198,11 @@ tag.text == fields1[item]
                     #print("img not found")
                 attributes = tag.attrs
                 if item == "product_description":
-                    print("attributes of product_description")
+                    pass
+                    #print("attributes of product_description")
+                    #print(attributes)
+                if item == "rating":
+                    print("attributes of rating : ")
                     print(attributes)
                 if len(attributes) == 0:
                     print("passed")
@@ -208,6 +232,9 @@ tag.text == fields1[item]
                             if item == "review_product_size":
                                 #print(selection_string)
                                 pass
+                            if item  == "rating":
+                                print("selection_string of rating  :")
+                                print(selection_string)
                             selection = soup1.select(selection_string)
                             
                            
@@ -217,8 +244,14 @@ tag.text == fields1[item]
                                 #print(condition)
                                 pass
                             if item == "product_description":
-                                print("2 : ")
+                                pass
+                                #print("2 : ")
+                                #print(selection)
+                                #print(condition)
+                            if item == "rating":
+                                print("selection of rating : ")
                                 print(selection)
+                                print("condition of rating :  ")
                                 print(condition)
                             if   len(condition) > 0 and len(selection) > 0 :
                                 
